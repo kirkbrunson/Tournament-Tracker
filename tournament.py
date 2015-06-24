@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
-import psycopg2, bleach
+import psycopg2
+import bleach
 
 
 def connect():
@@ -43,10 +44,10 @@ def countPlayers():
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
+
     Args:
       name: the player's full name (need not be unique).
     """
@@ -60,7 +61,7 @@ def registerPlayer(name):
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
-    The first entry in the list should be the player in first place, or a player
+    The first entry in the list should be the player in first place or a player
     tied for first place if there is currently a tie.
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -87,19 +88,21 @@ def reportMatch(winner, loser):
     DB = connect()
     c = DB.cursor()
 
-    c.execute("INSERT INTO matches VALUES(default, '%r','%r')" % (winner, loser))
+    c.execute("INSERT INTO matches VALUES(default, '%r','%r')" %
+              (winner, loser))
 
     DB.commit()
     DB.close()
- 
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
+
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -111,10 +114,11 @@ def swissPairings():
     DB = connect()
     c = DB.cursor()
 
-    # Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in one DB op, then splitting. More efficient?
+    # Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in
+    # one DB op, then splitting. More efficient?
     c.execute("SELECT id, name from v_PlayerStandings")
     standings = c.fetchall()
-    
+
     # Declare utils
     pairings = []
     index = 0
@@ -125,8 +129,8 @@ def swissPairings():
     index = len(standings)/2
     while i < index:
         pairings.append(standings[j]+standings[j+1])
-        i +=1
-        j +=2
+        i += 1
+        j += 2
 
     DB.close()
     return pairings
