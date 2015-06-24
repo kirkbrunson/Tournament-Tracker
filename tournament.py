@@ -9,13 +9,17 @@ import bleach
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+    try:
+        DB = psycopg2.connect("dbname=tournament")
+        cursor = DB.cursor()
+        return DB, cursor
+    except:
+        raise RuntimeError("An error occured, please try again")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute("DELETE from Matches")
     DB.commit()
     DB.close()
@@ -23,8 +27,7 @@ def deleteMatches():
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute("DELETE from Players")
     DB.commit()
     DB.close()
@@ -32,8 +35,7 @@ def deletePlayers():
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute("SELECT count(players.id) as player_count from players")
     count = c.fetchall()
     count = count[0][0]
@@ -52,8 +54,7 @@ def registerPlayer(name):
       name: the player's full name (need not be unique).
     """
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute("INSERT INTO players VALUES(default, %s)", (bleach.clean(name),))
     DB.commit()
     DB.close()
@@ -71,8 +72,7 @@ def playerStandings():
         matches: the number of matches the player has played
     """
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute("SELECT * from v_PlayerStandings")
     standings = c.fetchall()
     DB.close()
@@ -85,8 +85,7 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
 
     c.execute("INSERT INTO matches VALUES(default, '%r','%r')" %
               (winner, loser))
@@ -111,8 +110,7 @@ def swissPairings():
         name2: the second player's name
     """
 
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
 
     # Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in
     # one DB op, then splitting. More efficient?
