@@ -2,7 +2,8 @@
 #
 # tournament.py -- implementation of a Swiss-system tournament.
 # Implements all extra credit options except Opponent match wins
-# Note: doesn't run w. tournament_test.py as schema has been changed to support extra credit
+# Note: doesn't run w. tournament_test.py as
+# schema has been changed to support extra credit
 #
 
 
@@ -173,7 +174,8 @@ def checkRematch(winner, loser):
     res = c.fetchall()
 
     for i in res:
-        if (winner == i[0] or winner == i[1]) and (loser == i[0] or loser == i[1]):
+        if (winner == i[0] or winner == i[1])
+        and (loser == i[0] or loser == i[1]):
             raise RuntimeError("Cannot play rematch")
     DB.close()
 
@@ -203,22 +205,28 @@ def playerStandings(tournamentId):
     DB, c = connect()
 
     # c.execute("SELECT * from v_PlayerStandings")
-    # This is a monstrosity but I couldn't figure out how to pass an argument to my sql in order to support multiple tournaments-- so this is the view v_playerStandings with arg passing.
+    """This is a monstrosity but I couldn't figure out how to pass an argument
+    to my sql in order to support multiple tournaments--
+    so this is the view v_playerStandings with arg passing."""
     # Can you suggest how this should be done?
 
     player_info = "SELECT players.id as player_id, players.name, "
     wins = "(SELECT COALESCE(wins, 0) as wins
              FROM(SELECT sum(matches.matchValue) as wins
                   from Matches where players.id=matches.player1
-                  and matches.tournament_id= % s) as wins), "
+                  and matches.tournament_id=% s) as wins), "
     totalMatches = "(select * from (SELECT count(matches) as totalMatches
-                                    from Matches where((players.id=matches.player1
-                                                        or players.id=matches.player2)
-                                                       and matches.tournament_id= % s)) as totalMatches where totalMatches != 0) "
+                                    from Matches
+                                    where((players.id=matches.player1
+                                           or players.id=matches.player2)
+                                          and matches.tournament_id= % s)
+                                    )
+                     as totalMatches where totalMatches != 0) "
     fromAndfilters = "from Players, Tournaments where tournaments.id = %s
     and (SELECT count(matches) as totalMatches
-         from Matches where((players.id=matches.player1 or players.id=matches.player2)
-                            and matches.tournament_id= % s)) != 0 "
+         from Matches where((players.id=matches.player1
+                             or players.id=matches.player2)
+                            and matches.tournament_id=% s)) != 0 "
     odering = "ORDER BY wins desc"
     query = player_info + wins + totalMatches + fromAndfilters + odering
 
@@ -242,15 +250,19 @@ def swissPairings(tournamentId):
     wins = "(SELECT COALESCE(wins, 0) as wins
              FROM(SELECT sum(matches.matchValue) as wins
                   from Matches where players.id=matches.player1
-                  and matches.tournament_id= % s) as wins), "
+                  and matches.tournament_id=% s) as wins), "
     totalMatches = "(select * from (SELECT count(matches) as totalMatches
-                                    from Matches where((players.id=matches.player1
-                                                        or players.id=matches.player2)
-                                                       and matches.tournament_id= % s)) as totalMatches where totalMatches != 0) "
+                                    from Matches where(
+                                        (players.id=matches.player1
+                                         or players.id=matches.player2)
+        and matches.tournament_id= % s)
+    )
+        as totalMatches where totalMatches != 0) "
     fromAndfilters = "from Players, Tournaments where tournaments.id = %s
     and (SELECT count(matches) as totalMatches
-         from Matches where((players.id=matches.player1 or players.id=matches.player2)
-                            and matches.tournament_id= % s)) != 0 "
+         from Matches where((players.id=matches.player1
+                             or players.id=matches.player2)
+                            and matches.tournament_id=% s)) != 0 "
     odering = "ORDER BY wins desc"
     query = player_info + wins + totalMatches + fromAndfilters + odering
 
@@ -294,7 +306,8 @@ def swissPairings(tournamentId):
             if byeEligible(tournamentId, standings[len(standings)-i][0]):
                 reportMatch(
                     tournamentId, standings[len(standings)-i][0], 0, 'bye')
-                print "Player %r assigned a bye." % standings[len(standings)-i][0]
+                print "Player %r assigned a bye."
+                % standings[len(standings)-i][0]
                 i = 0
                 break
             i += 1
