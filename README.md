@@ -9,4 +9,4 @@ Project 2 for Udacity's FSND program
 - Run python tournament_test.py
 
 ### Notes:
-Extra credit is implemented in tournament_extra_credit.py. Run psql -f tournament_extra_credit.sql to use with this.
+Extra credit is implemented in tournament_extra_credit.py. Run psql -f tournament_extra_credit.sql to use with this. Plan to add test file for this shortly
