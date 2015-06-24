@@ -30,7 +30,7 @@ def deleteMatches():
     deleteTournamentReg()
     DB, c = connect()
 
-    c.execute("DELETE from Matches")
+    c.execute("TRUNCATE Matches CASCADE")
     DB.commit()
     DB.close()
 
@@ -43,7 +43,7 @@ def deletePlayers():
 
     DB, c = connect()
 
-    c.execute("DELETE from Players")
+    c.execute("TRUNCATE Players CASCADE")
     DB.commit()
     DB.close()
 
@@ -52,8 +52,8 @@ def deleteTournamentReg():
     """Removes current tournament registrations"""
     DB, c = connect()
 
-    c.execute("DELETE from ByeLog")
-    c.execute("DELETE from TournamentRegistration")
+    c.execute("TRUNCATE ByeLog CASCADE")
+    c.execute("TRUNCATE TournamentRegistration CASCADE")
     DB.commit()
     DB.close()
 
@@ -62,10 +62,10 @@ def deleteTournaments():
     """Removes all records other than players"""
     DB, c = connect()
 
-    c.execute("DELETE from ByeLog")
-    c.execute("DELETE from Matches")
-    c.execute("DELETE from TournamentRegistration")
-    c.execute("DELETE from Tournaments")
+    c.execute("TRUNCATE ByeLog CASCADE")
+    c.execute("TRUNCATE Matches CASCADE")
+    c.execute("TRUNCATE TournamentRegistration CASCADE")
+    c.execute("TRUNCATE Tournaments CASCADE")
     DB.commit()
     DB.close()
 
