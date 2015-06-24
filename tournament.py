@@ -55,7 +55,9 @@ def registerPlayer(name):
     """
 
     DB, c = connect()
-    c.execute("INSERT INTO players VALUES(default, %s)", (bleach.clean(name),))
+    query = "INSERT INTO players VALUES(default, %s);"
+    param = (bleach.clean(name),)
+    c.execute(query, param)
     DB.commit()
     DB.close()
 
@@ -87,8 +89,9 @@ def reportMatch(winner, loser):
     """
     DB, c = connect()
 
-    c.execute("INSERT INTO matches VALUES(default, '%r','%r')" %
-              (winner, loser))
+    query = "INSERT INTO matches VALUES(default, %s, %s);"
+    param = (winner, loser,)
+    c.execute(query, param)
 
     DB.commit()
     DB.close()

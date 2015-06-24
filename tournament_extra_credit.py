@@ -76,7 +76,10 @@ def createPlayer(name):
     """Adds a player to the tournament database."""
     DB, c = connect()
 
-    c.execute("INSERT INTO players VALUES(default, %s)", (bleach.clean(name),))
+    query = "INSERT INTO players VALUES(default, %s);"
+    param = (bleach.clean(name),)
+    c.execute(query, param)
+
     DB.commit()
     DB.close()
 
@@ -86,8 +89,10 @@ def createTournament(name):
 
     DB, c = connect()
 
-    c.execute(
-        "INSERT INTO Tournaments VALUES(default, %s)", (bleach.clean(name),))
+    query = "INSERT INTO Tournaments VALUES(default, %s);"
+    param = (bleach.clean(name),)
+    c.execute(query, param)
+
     DB.commit()
     DB.close()
 
@@ -97,8 +102,10 @@ def tournamentReg(tournament, player):
 
     DB, c = connect()
 
-    c.execute("INSERT INTO TournamentRegistration VALUES(default, %r, %r)" % (
-        tournament, player))
+    query = "INSERT INTO TournamentRegistration VALUES(default, %r, %r);"
+    param = (tournament, player)
+    c.execute(query, param)
+
     DB.commit()
     DB.close()
 
@@ -109,7 +116,9 @@ def countPlayers():
     """Returns the number of players currently registered."""
     DB, c = connect()
 
-    c.execute("SELECT count(players.id) as player_count from players")
+    query = "SELECT count(players.id) as player_count from players;"
+
+    c.execute(query)
     count = c.fetchall()
     count = count[0][0]
 
@@ -130,23 +139,23 @@ def reportMatch(tournament, winner, loser, matchResult):
 
     DB, c = connect()
 
+    query = "INSERT INTO matches VALUES(default, %s, %s, %s, %s);"
     try:
         # insert a bye into matches
         if matchResult == 'bye':
-            c.execute("INSERT INTO matches VALUES(default, '%r', '%r', NULL, default)" % (
-                tournament, winner))
+            c.execute(query, (tournament, winner, NULL, 1))
             c.execute("INSERT INTO byeLog VALUES(default, '%r', '%r')" %
                       (tournament, winner))
 
         # insert draw
         elif matchResult == 'draw':
-            c.execute("INSERT INTO matches VALUES(default, '%r','%r', '%r', 0.5)" % (
-                tournament, winner, loser))
+            draw_param = (tournament, winner, loser, 0.5)
+            c.execute(query, draw_param)
 
         # insert a win/loss
         elif matchResult == 'win' or matchResult == 'loss':
-            c.execute("INSERT INTO matches VALUES(default, '%r','%r', '%r', default)" % (
-                tournament, winner, loser))
+            win_param = (tournament, winner, loser, 1)
+            c.execute(query, win_param)
 
         DB.commit()
         DB.close()
@@ -159,7 +168,8 @@ def reportMatch(tournament, winner, loser, matchResult):
 def checkRematch(winner, loser):
     DB, c = connect()
 
-    c.execute("SELECT player1, player2 from Matches")
+    query = "SELECT player1, player2 from Matches;"
+    c.execute(query)
     res = c.fetchall()
 
     for i in res:
@@ -173,8 +183,9 @@ def byeEligible(tournamentId, player):
 
     DB, c = connect()
 
-    c.execute("SELECT * from byeLog where tournament_id = %r and player_id = %r" %
-              (tournamentId, player))
+    query = "SELECT * from byeLog where tournament_id = %s and player_id = %s;"
+    param = (tournamentId, player)
+    c.execute(query, param)
     temp = c.fetchall()
 
     # test if player already has a bye.
@@ -194,8 +205,26 @@ def playerStandings(tournamentId):
     # c.execute("SELECT * from v_PlayerStandings")
     # This is a monstrosity but I couldn't figure out how to pass an argument to my sql in order to support multiple tournaments-- so this is the view v_playerStandings with arg passing.
     # Can you suggest how this should be done?
-    c.execute(
-        "SELECT players.id as player_id, players.name, (SELECT COALESCE(wins, 0) as wins FROM (SELECT sum(matches.matchValue) as wins from Matches where players.id = matches.player1 and matches.tournament_id = %r) as wins), (select * from (SELECT count(matches) as totalMatches from Matches where ((players.id = matches.player1 or players.id = matches.player2) and matches.tournament_id = %r)) as totalMatches where totalMatches != 0) from Players, Tournaments where tournaments.id = %r and (SELECT count(matches) as totalMatches from Matches where ((players.id = matches.player1 or players.id = matches.player2) and matches.tournament_id = %r)) !=0 ORDER BY wins desc" % (t, t, t, t))
+
+    player_info = "SELECT players.id as player_id, players.name, "
+    wins = "(SELECT COALESCE(wins, 0) as wins
+             FROM(SELECT sum(matches.matchValue) as wins
+                  from Matches where players.id=matches.player1
+                  and matches.tournament_id= % s) as wins), "
+    totalMatches = "(select * from (SELECT count(matches) as totalMatches
+                                    from Matches where((players.id=matches.player1
+                                                        or players.id=matches.player2)
+                                                       and matches.tournament_id= % s)) as totalMatches where totalMatches != 0) "
+    fromAndfilters = "from Players, Tournaments where tournaments.id = %s
+    and (SELECT count(matches) as totalMatches
+         from Matches where((players.id=matches.player1 or players.id=matches.player2)
+                            and matches.tournament_id= % s)) != 0 "
+    odering = "ORDER BY wins desc"
+    query = player_info + wins + totalMatches + fromAndfilters + odering
+
+    param = (t, t, t, t)
+
+    c.execute(query, param)
     standings = c.fetchall()
     DB.close()
     return standings
@@ -209,8 +238,25 @@ def swissPairings(tournamentId):
     # Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in
     # one DB op, then splitting. More efficient?
     t = tournamentId
-    c.execute(
-        "SELECT players.id as player_id, players.name, (SELECT COALESCE(wins, 0) as wins FROM (SELECT sum(matches.matchValue) as wins from Matches where players.id = matches.player1 and matches.tournament_id = %r) as wins), (select * from (SELECT count(matches) as totalMatches from Matches where ((players.id = matches.player1 or players.id = matches.player2) and matches.tournament_id = %r)) as totalMatches where totalMatches != 0) from Players, Tournaments where tournaments.id = %r and (SELECT count(matches) as totalMatches from Matches where ((players.id = matches.player1 or players.id = matches.player2) and matches.tournament_id = %r)) !=0 ORDER BY wins desc" % (t, t, t, t))
+    player_info = "SELECT players.id as player_id, players.name, "
+    wins = "(SELECT COALESCE(wins, 0) as wins
+             FROM(SELECT sum(matches.matchValue) as wins
+                  from Matches where players.id=matches.player1
+                  and matches.tournament_id= % s) as wins), "
+    totalMatches = "(select * from (SELECT count(matches) as totalMatches
+                                    from Matches where((players.id=matches.player1
+                                                        or players.id=matches.player2)
+                                                       and matches.tournament_id= % s)) as totalMatches where totalMatches != 0) "
+    fromAndfilters = "from Players, Tournaments where tournaments.id = %s
+    and (SELECT count(matches) as totalMatches
+         from Matches where((players.id=matches.player1 or players.id=matches.player2)
+                            and matches.tournament_id= % s)) != 0 "
+    odering = "ORDER BY wins desc"
+    query = player_info + wins + totalMatches + fromAndfilters + odering
+
+    param = (t, t, t, t)
+
+    c.execute(query, param)
     standings = c.fetchall()
 
     # Declare utils
