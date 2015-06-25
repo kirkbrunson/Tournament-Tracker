@@ -125,7 +125,7 @@ def swissPairings():
     # Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in
     # one DB op, then splitting. More efficient?
 
-    query = "SELECT id, name from v_PlayerStandings;"
+    query = "SELECT * from v_swissPairings;"
     c.execute(query)
     standings = c.fetchall()
 
