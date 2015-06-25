@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>tournament_extra_credit.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>tournament_extra_credit.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>tournament.py -- implementation of a Swiss-system tournament.
+Implements all extra credit options except Opponent match wins
+Note: doesn't run w. tournament_test.py as
+schema has been changed to support extra credit</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">import</span> <span class="nn">psycopg2</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">bleach</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Connect to the PostgreSQL database.  Returns a database connection.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">connect</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">DB</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;dbname=tournament&quot;</span><span class="p">)</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">DB</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">DB</span><span class="p">,</span> <span class="n">cursor</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;An error occured, please try again&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <h6>##### <span id="delete-functions" href="delete-functions"> Delete functions </span></h6>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Remove all the match records from the database.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">deleteMatches</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>Deals with integrity of foreign keys</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">deleteTournamentReg</span><span class="p">()</span>
+    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE Matches CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Remove all the player records from the database.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">deletePlayers</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Deals with integrity of foreign keys</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">deleteTournaments</span><span class="p">()</span>
+
+    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE Players CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Removes current tournament registrations</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">deleteTournamentReg</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE ByeLog CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE TournamentRegistration CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>Removes all records other than players</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">deleteTournaments</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE ByeLog CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE Matches CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE TournamentRegistration CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;TRUNCATE Tournaments CASCADE&quot;</span><span class="p">)</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <h6>##### <span id="create-functions" href="create-functions"> Create functions </span></h6>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Adds a player to the tournament database.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">createPlayer</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO players VALUES(default, </span><span class="si">%s</span><span class="s">);&quot;</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="p">(</span><span class="n">bleach</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">name</span><span class="p">),)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">createTournament</span><span class="p">(</span><span class="n">name</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>Creates a new tournament</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO Tournaments VALUES(default, </span><span class="si">%s</span><span class="s">);&quot;</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="p">(</span><span class="n">bleach</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">name</span><span class="p">),)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">tournamentReg</span><span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">player</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>Registers a player into a created tournament</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO TournamentRegistration VALUES(default, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">);&quot;</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">player</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
+    <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <h6>##### <span id="utility-functions" href="utility-functions"> Utility functions </span></h6>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Returns the number of players currently registered.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">countPlayers</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;SELECT count(players.id) as player_count from players;&quot;</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">count</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>Records the outcome of a single match between two players.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">reportMatch</span><span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">winner</span><span class="p">,</span> <span class="n">loser</span><span class="p">,</span> <span class="n">matchResult</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p><strong>Note</strong> pass 0 as loserVal in reporting a bye</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>Check if winner/ loser the same</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">winner</span> <span class="o">==</span> <span class="n">loser</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Winner and loser cannot be the same&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p>Test for rematch between players</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">checkRematch</span><span class="p">(</span><span class="n">winner</span><span class="p">,</span> <span class="n">loser</span><span class="p">)</span>
+
+    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;INSERT INTO matches VALUES(default, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">);&quot;</span>
+    <span class="k">try</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      <p>insert a bye into matches</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">matchResult</span> <span class="o">==</span> <span class="s">&#39;bye&#39;</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">winner</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;INSERT INTO byeLog VALUES(default, &#39;</span><span class="si">%r</span><span class="s">&#39;, &#39;</span><span class="si">%r</span><span class="s">&#39;)&quot;</span> <span class="o">%</span>
+                      <span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">winner</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p>insert draw</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="n">matchResult</span> <span class="o">==</span> <span class="s">&#39;draw&#39;</span><span class="p">:</span>
+            <span class="n">draw_param</span> <span class="o">=</span> <span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">winner</span><span class="p">,</span> <span class="n">loser</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">draw_param</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>insert a win/loss</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="n">matchResult</span> <span class="o">==</span> <span class="s">&#39;win&#39;</span> <span class="ow">or</span> <span class="n">matchResult</span> <span class="o">==</span> <span class="s">&#39;loss&#39;</span><span class="p">:</span>
+            <span class="n">win_param</span> <span class="o">=</span> <span class="p">(</span><span class="n">tournament</span><span class="p">,</span> <span class="n">winner</span><span class="p">,</span> <span class="n">loser</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">win_param</span><span class="p">)</span>
+
+        <span class="n">DB</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s">&quot;An error occurred when reporting match. Please try again.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p>Need to chk tournamentID to fully support multiple tournaments</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">checkRematch</span><span class="p">(</span><span class="n">winner</span><span class="p">,</span> <span class="n">loser</span><span class="p">):</span>
+    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;SELECT player1, player2 from Matches;&quot;</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">winner</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">winner</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="ow">and</span> <span class="p">(</span><span class="n">loser</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">loser</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Cannot play rematch&quot;</span><span class="p">)</span>
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">byeEligible</span><span class="p">(</span><span class="n">tournamentId</span><span class="p">,</span> <span class="n">player</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p>Tests whether player has already been granted a bye</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="s">&quot;SELECT * from byeLog where tournament_id = </span><span class="si">%s</span><span class="s"> and player_id = </span><span class="si">%s</span><span class="s">;&quot;</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="p">(</span><span class="n">tournamentId</span><span class="p">,</span> <span class="n">player</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      <p>test if player already has a bye.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">temp</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      <p>Returns a list of the players and their win records, sorted by wins.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">playerStandings</span><span class="p">(</span><span class="n">tournamentId</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>Returns standings for tournament number given</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">t</span> <span class="o">=</span> <span class="n">tournamentId</span>
+    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>c.execute("SELECT * from v_PlayerStandings")
+This is a monstrosity but I couldn't figure out how to pass an argument
+to my sql in order to support multiple tournaments--
+so this is the view v_playerStandings with arg passing."""</p>
+<h1>Can you suggest how this should be done?</h1>
+<p>player_info = "SELECT players.id as player_id, players.name, "
+wins = "(SELECT COALESCE(wins, 0) as wins
+         FROM(SELECT sum(matches.matchValue) as wins
+              from Matches where players.id=matches.player1
+              and matches.tournament_id=% s) as wins), "
+totalMatches = "(select * from (SELECT count(matches) as totalMatches
+                                from Matches
+                                where((players.id=matches.player1
+                                       or players.id=matches.player2)
+                                      and matches.tournament_id= % s)
+                                )
+                 as totalMatches where totalMatches != 0) "
+fromAndfilters = "from Players, Tournaments where tournaments.id = %s
+and (SELECT count(matches) as totalMatches
+     from Matches where((players.id=matches.player1
+                         or players.id=matches.player2)
+                        and matches.tournament_id=% s)) != 0 "
+odering = "ORDER BY wins desc"
+query = player_info + wins + totalMatches + fromAndfilters + odering</p>
+<p>param = (t, t, t, t)</p>
+<p>c.execute(query, param)
+standings = c.fetchall()
+DB.close()
+return standings</p>
+<p>swissPairings(tournamentId):
+Returns a list of pairs of players for the next round of a match.
+Returns pairings for tournament number given</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">DB</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">connect</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p>Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in
+one DB op, then splitting. More efficient?</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">t</span> <span class="o">=</span> <span class="n">tournamentId</span>
+    <span class="n">player_info</span> <span class="o">=</span> <span class="s">&quot;SELECT players.id as player_id, players.name, &quot;</span>
+    <span class="n">wins</span> <span class="o">=</span> <span class="s">&quot;(SELECT COALESCE(wins, 0) as wins</span>
+             <span class="n">FROM</span><span class="p">(</span><span class="n">SELECT</span> <span class="nb">sum</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">matchValue</span><span class="p">)</span> <span class="k">as</span> <span class="n">wins</span>
+                  <span class="kn">from</span> <span class="nn">Matches</span> <span class="nn">where</span> <span class="nn">players.id</span><span class="o">=</span><span class="n">matches</span><span class="o">.</span><span class="n">player1</span>
+                  <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">tournament_id</span><span class="o">=%</span> <span class="n">s</span><span class="p">)</span> <span class="k">as</span> <span class="n">wins</span><span class="p">),</span> <span class="s">&quot;</span>
+    <span class="n">totalMatches</span> <span class="o">=</span> <span class="s">&quot;(select * from (SELECT count(matches) as totalMatches</span>
+                                    <span class="kn">from</span> <span class="nn">Matches</span> <span class="nn">where</span><span class="p">(</span>
+                                        <span class="p">(</span><span class="n">players</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="n">matches</span><span class="o">.</span><span class="n">player1</span>
+                                         <span class="ow">or</span> <span class="n">players</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="n">matches</span><span class="o">.</span><span class="n">player2</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">tournament_id</span><span class="o">=</span> <span class="o">%</span> <span class="n">s</span><span class="p">)</span>
+    <span class="p">)</span>
+        <span class="k">as</span> <span class="n">totalMatches</span> <span class="n">where</span> <span class="n">totalMatches</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="s">&quot;</span>
+    <span class="n">fromAndfilters</span> <span class="o">=</span> <span class="s">&quot;from Players, Tournaments where tournaments.id = </span><span class="si">%s</span>
+    <span class="ow">and</span> <span class="p">(</span><span class="n">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="k">as</span> <span class="n">totalMatches</span>
+         <span class="kn">from</span> <span class="nn">Matches</span> <span class="nn">where</span><span class="p">((</span><span class="n">players</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="n">matches</span><span class="o">.</span><span class="n">player1</span>
+                             <span class="ow">or</span> <span class="n">players</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="n">matches</span><span class="o">.</span><span class="n">player2</span><span class="p">)</span>
+                            <span class="ow">and</span> <span class="n">matches</span><span class="o">.</span><span class="n">tournament_id</span><span class="o">=%</span> <span class="n">s</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span> <span class="s">&quot;</span>
+    <span class="n">odering</span> <span class="o">=</span> <span class="s">&quot;ORDER BY wins desc&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">player_info</span> <span class="o">+</span> <span class="n">wins</span> <span class="o">+</span> <span class="n">totalMatches</span> <span class="o">+</span> <span class="n">fromAndfilters</span> <span class="o">+</span> <span class="n">odering</span>
+
+    <span class="n">param</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+    <span class="n">standings</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p>Declare utils</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">pairings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-40'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-40'>#</a>
+      </div>
+      <p>Test if no players returned</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;No players to pair.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-41'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-41'>#</a>
+      </div>
+      <p>Even cases:</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-42'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-42'>#</a>
+      </div>
+      <p>so hackish... issue resulting from not passing arg to a view or
+function in sql.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">standings</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">standings</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">temp1</span> <span class="o">=</span> <span class="n">a</span><span class="p">,</span> <span class="n">s</span>
+            <span class="n">temp2</span> <span class="o">=</span> <span class="n">q</span><span class="p">,</span> <span class="n">w</span>
+            <span class="n">pairings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp1</span> <span class="o">+</span> <span class="n">temp2</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">2</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-43'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-43'>#</a>
+      </div>
+      <p>Odd cases:</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-44'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-44'>#</a>
+      </div>
+      <p>Forward chk if last player is eligible for a bye. Assign bye if so,
+move up and rep if not.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">byeEligible</span><span class="p">(</span><span class="n">tournamentId</span><span class="p">,</span> <span class="n">standings</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">reportMatch</span><span class="p">(</span>
+                    <span class="n">tournamentId</span><span class="p">,</span> <span class="n">standings</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;bye&#39;</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&quot;Player </span><span class="si">%r</span><span class="s"> assigned a bye.&quot;</span>
+                <span class="o">%</span> <span class="n">standings</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-45'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-45'>#</a>
+      </div>
+      <p>Assign pairings</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">standings</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">standings</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">temp1</span> <span class="o">=</span> <span class="n">a</span><span class="p">,</span> <span class="n">s</span>
+            <span class="n">temp2</span> <span class="o">=</span> <span class="n">q</span><span class="p">,</span> <span class="n">w</span>
+            <span class="n">pairings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp1</span> <span class="o">+</span> <span class="n">temp2</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">2</span>
+
+    <span class="n">DB</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">pairings</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
