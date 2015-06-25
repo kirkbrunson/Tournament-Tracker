@@ -41,6 +41,9 @@ CREATE VIEW v_matchCount AS
 	select id, totalMatches from v_PlayerStandings;
 
 
+CREATE VIEW v_playerCount AS
+	SELECT count(players.id) as player_count from players;
+
 -- Values to populate DB
 
 -- Create players

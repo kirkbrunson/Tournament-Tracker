@@ -20,7 +20,9 @@ def connect():
 def deleteMatches():
     """Remove all the match records from the database."""
     DB, c = connect()
-    c.execute("TRUNCATE Matches CASCADE")
+
+    query = "TRUNCATE Matches CASCADE;"
+    c.execute(query)
     DB.commit()
     DB.close()
 
@@ -28,7 +30,9 @@ def deleteMatches():
 def deletePlayers():
     """Remove all the player records from the database."""
     DB, c = connect()
-    c.execute("TRUNCATE Players CASCADE")
+
+    query = "TRUNCATE Players CASCADE;"
+    c.execute(query)
     DB.commit()
     DB.close()
 
@@ -36,7 +40,8 @@ def deletePlayers():
 def countPlayers():
     """Returns the number of players currently registered."""
     DB, c = connect()
-    c.execute("SELECT count(players.id) as player_count from players")
+    query = "SELECT * from v_playerCount;"
+    c.execute(query)
     count = c.fetchall()
     count = count[0][0]
 
@@ -75,7 +80,9 @@ def playerStandings():
     """
 
     DB, c = connect()
-    c.execute("SELECT * from v_PlayerStandings")
+
+    query = "SELECT * from v_PlayerStandings;"
+    c.execute(query)
     standings = c.fetchall()
     DB.close()
     return standings
@@ -117,7 +124,9 @@ def swissPairings():
 
     # Could repeatedly (SELECT ... limit 2 offset N)-- instead calling all in
     # one DB op, then splitting. More efficient?
-    c.execute("SELECT id, name from v_PlayerStandings")
+
+    query = "SELECT id, name from v_PlayerStandings;"
+    c.execute(query)
     standings = c.fetchall()
 
     # Declare utils
