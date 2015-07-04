@@ -2,6 +2,7 @@
 
 ### Description
 Project 2 for Udacity's FSND program
+Implements a Swiss-system tournament for N players.
 
 ### Setup
 - Clone into a vagrant machine setup for the fullstack class
