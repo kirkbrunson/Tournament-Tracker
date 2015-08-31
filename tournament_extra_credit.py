@@ -227,8 +227,8 @@ def playerStandings(tournamentId):
          from Matches where((players.id=matches.player1
                              or players.id=matches.player2)
                             and matches.tournament_id=% s)) != 0 "
-    odering = "ORDER BY wins desc"
-    query = player_info + wins + totalMatches + fromAndfilters + odering
+    ordering = "ORDER BY wins desc"
+    query = player_info + wins + totalMatches + fromAndfilters + ordering
 
     param = (t, t, t, t)
 
@@ -263,8 +263,8 @@ def swissPairings(tournamentId):
          from Matches where((players.id=matches.player1
                              or players.id=matches.player2)
                             and matches.tournament_id=% s)) != 0 "
-    odering = "ORDER BY wins desc"
-    query = player_info + wins + totalMatches + fromAndfilters + odering
+    ordering = "ORDER BY wins desc"
+    query = player_info + wins + totalMatches + fromAndfilters + ordering
 
     param = (t, t, t, t)
 
